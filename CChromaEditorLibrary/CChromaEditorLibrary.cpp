@@ -78,933 +78,198 @@ CCChromaEditorLibraryApp theApp;
 
 BOOL CCChromaEditorLibraryApp::InitInstance()
 {
-	CWinApp::InitInstance();
-
 	return TRUE;
 }
 
 CMainViewDlg::CMainViewDlg() : CDialogEx(IDD_MAIN_VIEW)
 {
-	_mDialogInitialized = false; //must be first
-	SetPath("");
-	_mPlayOnOpen = false;
+	return;
 }
 
 CMainViewDlg::~CMainViewDlg()
 {
-	_mEdit1D.GetAnimation()->Stop();
-	_mEdit2D.GetAnimation()->Stop();
+	return;
 }
 
 void CMainViewDlg::OpenOrCreateAnimation(const std::string& path)
 {
-	SetPath(path);
+	return;
 }
 
 void CMainViewDlg::PlayAnimationOnOpen()
 {
-	_mPlayOnOpen = true;
+	return;
 }
 
 void CMainViewDlg::LoadFile()
 {
-	if (_mPath.empty())
-	{
-		fprintf(stderr, "LoadFile: Path cannot be empty! Using `%s` instead.\r\n", TEMP_FILE);
-		SetPath(TEMP_FILE);
-	}
-	
-	UpdateWindowTitle();
-
-	AnimationBase* animation = ChromaSDKPlugin::GetInstance()->OpenAnimation(_mPath);
-	if (animation)
-	{
-		Animation1D* animation1D;
-		Animation2D* animation2D;
-		switch (animation->GetDeviceType())
-		{
-		case EChromaSDKDeviceTypeEnum::DE_1D:
-			_mEdit1D.SetPath(_mPath);
-			_mDeviceType = animation->GetDeviceType();
-			animation1D = dynamic_cast<Animation1D*>(animation);
-			_mEdit1D.SetAnimation(*animation1D);
-			_mEdit1D.Reset();
-			delete animation;
-			break;
-		case EChromaSDKDeviceTypeEnum::DE_2D:
-			_mEdit2D.SetPath(_mPath);
-			_mDeviceType = animation->GetDeviceType();
-			animation2D = dynamic_cast<Animation2D*>(animation);
-			_mEdit2D.SetAnimation(*animation2D);
-			delete animation;
-			break;
-		default:
-			fprintf(stderr, "LoadFile: Unexpected animation type!");
-			return;
-		}
-	}
+	return;
 }
 
 void CMainViewDlg::SaveFile()
 {
-	FILE* stream;
-	int result = fopen_s(&stream, _mPath.c_str(), "wb");
-	if (result == 13)
-	{
-		fprintf(stderr, "SaveFile: Permission denied!\r\n");
-		return;
-	}
-	else if (0 == result &&
-		stream)
-	{
-		long write = 0;
-		long expectedWrite = 1;
-		long expectedSize = 0;
-
-		int version = ANIMATION_VERSION;
-		expectedSize = sizeof(int);
-		write = fwrite(&version, expectedSize, 1, stream);
-		if (expectedWrite != write)
-		{
-			fprintf(stderr, "SaveFile: Failed to write version!\r\n");
-			std::fclose(stream);
-			return;
-		}
-
-		//device
-		byte device = 0;
-
-		//device type
-		byte deviceType = (byte)_mDeviceType;
-		expectedSize = sizeof(byte);
-		fwrite(&deviceType, expectedSize, 1, stream);
-
-		//device
-		switch (_mDeviceType)
-		{
-		case EChromaSDKDeviceTypeEnum::DE_1D:
-			device = _mEdit1D.GetDevice();
-			fwrite(&device, expectedSize, 1, stream);
-			break;
-		case EChromaSDKDeviceTypeEnum::DE_2D:
-			device = _mEdit2D.GetDevice();
-			fwrite(&device, expectedSize, 1, stream);
-			break;
-		}
-
-		//frame count
-		unsigned int frameCount = 0;
-		switch (_mDeviceType)
-		{
-		case EChromaSDKDeviceTypeEnum::DE_1D:
-			frameCount = _mEdit1D.GetFrameCount();
-			break;
-		case EChromaSDKDeviceTypeEnum::DE_2D:
-			frameCount = _mEdit2D.GetFrameCount();
-			break;
-		}
-		expectedSize = sizeof(unsigned int);
-		fwrite(&frameCount, expectedSize, 1, stream);
-
-		//frames
-		float duration = 0.0f;
-		COLORREF color = RGB(0, 0, 0);
-		for (unsigned int index = 0; index < frameCount; ++index)
-		{
-			//duration
-			switch (_mDeviceType)
-			{
-			case EChromaSDKDeviceTypeEnum::DE_1D:
-				duration = _mEdit1D.GetDuration(index);
-				break;
-			case EChromaSDKDeviceTypeEnum::DE_2D:
-				duration = _mEdit2D.GetDuration(index);
-				break;
-			}
-			expectedSize = sizeof(float);
-			fwrite(&duration, expectedSize, 1, stream);
-
-			//colors
-			switch (_mDeviceType)
-			{
-			case EChromaSDKDeviceTypeEnum::DE_1D:
-				{
-					vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-					if (index < frames.size())
-					{
-						FChromaSDKColorFrame1D& frame = frames[index];
-						for (unsigned int i = 0; i < frame.Colors.size(); ++i)
-						{
-							//color
-							int color = (int)frame.Colors[i];
-							expectedSize = sizeof(int);
-							fwrite(&color, expectedSize, 1, stream);
-						}
-					}
-				}
-				break;
-			case EChromaSDKDeviceTypeEnum::DE_2D:
-				{
-					vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-					if (index < frames.size())
-					{
-						FChromaSDKColorFrame2D& frame = frames[index];
-						for (unsigned int i = 0; i < frame.Colors.size(); ++i)
-						{
-							FChromaSDKColors& row = frame.Colors[i];
-							for (unsigned int j = 0; j < row.Colors.size(); ++j)
-							{
-								//color
-								int color = row.Colors[j];
-								expectedSize = sizeof(int);
-								fwrite(&color, expectedSize, 1, stream);
-							}
-						}
-					}
-				}
-				break;
-			}
-		}
-
-		fflush(stream);
-		std::fclose(stream);
-	}
+	return;
 }
 
 CEdit* CMainViewDlg::GetControlOverrideTime()
 {
-	return (CEdit*)GetDlgItem(IDC_TEXT_OVERRIDE_TIME);
+	return NULL;
 }
 
 CStatic* CMainViewDlg::GetControlGridSize()
 {
-	return (CStatic*)GetDlgItem(IDC_STATIC_GRID_SIZE);
+	return NULL;
 }
 
 CStatic* CMainViewDlg::GetControlSetKeyLabel()
 {
-	return (CStatic*)GetDlgItem(IDC_STATIC_SELECT_KEY);
+	return NULL;
 }
 
 CComboBox* CMainViewDlg::GetControlSetKeyCombo()
 {
-	return (CComboBox*)GetDlgItem(IDC_COMBO_KEYS);
+	return NULL;
 }
 
 CButton* CMainViewDlg::GetControlSetKeyButton()
 {
-	return (CButton*)GetDlgItem(IDC_BUTTON_SET_KEY);
+	return NULL;
 }
 
 CStatic* CMainViewDlg::GetControlSetLEDLabel()
 {
-	return (CStatic*)GetDlgItem(IDC_STATIC_SELECT_LED);
+	return NULL;
 }
 
 CComboBox* CMainViewDlg::GetControlSetLEDCombo()
 {
-	return (CComboBox*)GetDlgItem(IDC_COMBO_LEDS);
+	return NULL;
 }
 
 CButton* CMainViewDlg::GetControlSetLEDButton()
 {
-	return (CButton*)GetDlgItem(IDC_BUTTON_SET_LED);
+	return NULL;
 }
 
 CStatic* CMainViewDlg::GetControlFrames()
 {
-	return (CStatic*)GetDlgItem(IDC_STATIC_FRAMES);
+	return NULL;
 }
 
 CEdit* CMainViewDlg::GetControlFrameIndex()
 {
-	return (CEdit*)GetDlgItem(IDC_EDIT_FRAME_INDEX);
+	return NULL;
 }
 
 CEdit* CMainViewDlg::GetControlDuration()
 {
-	return (CEdit*)GetDlgItem(IDC_EDIT_DURATION);
+	return NULL;
 }
 
 CSliderCtrl* CMainViewDlg::GetBrushSlider()
 {
-	return (CSliderCtrl*)GetDlgItem(IDC_SLIDER_BRUSH);
+	return NULL;
 }
 
 CEdit* CMainViewDlg::GetControlEditBrush()
 {
-	return (CEdit*)GetDlgItem(IDC_EDIT_BRUSH);
+	return NULL;
 }
 
 CEdit* CMainViewDlg::GetControlEditDelete()
 {
-	return (CEdit*)GetDlgItem(IDC_EDIT_DELETE);
+	return NULL;
 }
 
 void CMainViewDlg::UpdateOverrideTime(float time)
 {
-	char buffer[10] = { 0 };
-	sprintf_s(buffer, "%f", time);
-	GetControlOverrideTime()->SetWindowText(CString(buffer));
-	GetControlOverrideTime()->Invalidate();
+	return;
 }
 
 float CMainViewDlg::GetOverrideTime()
 {
-	CString text;
-	GetControlOverrideTime()->GetWindowText(text);
-	float time = (float)_ttof(text);
-	if (time <= 0.0f)
-	{
-		UpdateOverrideTime(DEFAULT_OVERRIDE_TIME);
-		return DEFAULT_OVERRIDE_TIME;
-	}
-	return time;
+	return 0;
 }
 
 void CMainViewDlg::UpdateDuration(float time)
 {
-	char buffer[10] = { 0 };
-	sprintf_s(buffer, "%f", time);
-	GetControlDuration()->SetWindowText(CString(buffer));
-	GetControlDuration()->Invalidate();
+	return;
 }
 
 float CMainViewDlg::GetDuration()
 {
-	CString text;
-	GetControlDuration()->GetWindowText(text);
-	float time = (float)_ttof(text);
-	if (time <= 0.0f)
-	{
-		UpdateDuration(DEFAULT_DURATION);
-		return DEFAULT_DURATION;
-	}
-	return time;
+	return 0;
 }
 
 void CMainViewDlg::RefreshDevice()
 {
-	int show = _mDeviceType == EChromaSDKDeviceTypeEnum::DE_2D && _mEdit2D.GetDevice() == EChromaSDKDevice2DEnum::DE_Keyboard;
-	GetControlSetKeyLabel()->ShowWindow(show);
-	GetControlSetKeyCombo()->ShowWindow(show);
-	GetControlSetKeyButton()->ShowWindow(show);
-
-	show = _mDeviceType == EChromaSDKDeviceTypeEnum::DE_2D && _mEdit2D.GetDevice() == EChromaSDKDevice2DEnum::DE_Mouse;
-	GetControlSetLEDLabel()->ShowWindow(show);
-	GetControlSetLEDCombo()->ShowWindow(show);
-	GetControlSetLEDButton()->ShowWindow(show);
-
-	GetControlListTypes()->ResetContent();
-	GetControlListTypes()->AddString(_T("ChromaLink"));
-	GetControlListTypes()->AddString(_T("Headset"));
-	GetControlListTypes()->AddString(_T("Keyboard"));
-	GetControlListTypes()->AddString(_T("Keypad"));
-	GetControlListTypes()->AddString(_T("Mouse"));
-	GetControlListTypes()->AddString(_T("Mousepad"));
-
-	int index = 0;
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		switch (_mEdit1D.GetDevice())
-		{
-		case EChromaSDKDevice1DEnum::DE_ChromaLink:
-			index = 0;
-			break;
-		case EChromaSDKDevice1DEnum::DE_Headset:
-			index = 1;
-			break;
-		case EChromaSDKDevice1DEnum::DE_Mousepad:
-			index = 5;
-			break;
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		switch (_mEdit2D.GetDevice())
-		{
-		case EChromaSDKDevice2DEnum::DE_Keyboard:
-			index = 2;
-			break;
-		case EChromaSDKDevice2DEnum::DE_Keypad:
-			index = 3;
-			break;
-		case EChromaSDKDevice2DEnum::DE_Mouse:
-			index = 4;
-			break;
-		}
-		break;
-	}
-	GetControlListTypes()->SetCurSel(index);
+	return;
 }
 
 void CMainViewDlg::RecreateGrid()
 {
-	// clear old grid
-	vector<CColorButton*>& buttons = GetGridButtons();
-	for (unsigned int i = 0; i < buttons.size(); ++i)
-	{
-		CColorButton* button = buttons[i];
-		if (button)
-		{
-			button->DestroyWindow();
-			delete(button);
-		}
-	}
-	buttons.clear();
-
-	COLORREF black = RGB(0, 0, 0);
-
-	// update grid label
-	int width = 15;
-	int height = 30;
-	int y = 280;
-	int id = ID_DYNAMIC_BUTTON_MIN;
-	switch (_mDeviceType)
-	{
-		case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(_mEdit1D.GetDevice());
-			int x = 25;
-			for (int i = 0; i < maxLeds; ++i)
-			{
-				CColorButton* button = new CColorButton(black, black);
-				const int flags = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON |
-					BS_OWNERDRAW | BS_MULTILINE;
-				button->Create(_T(""), flags, CRect(x, y, x + width, y + height), this, id);
-				++id;
-				buttons.push_back(button);
-				x += width + 2;
-			}
-		}
-		break;
-		case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(_mEdit2D.GetDevice());
-			int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(_mEdit2D.GetDevice());
-
-			// create grid buttons
-			for (int j = 0; j < maxRow; ++j)
-			{
-				int x = 25;
-				for (int i = 0; i < maxColumn; ++i)
-				{
-					CColorButton* button = new CColorButton(black, black);
-					const int flags = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON |
-						BS_OWNERDRAW | BS_MULTILINE;
-					button->Create(_T(""), flags, CRect(x, y, x + width, y + height), this, id);
-					++id;
-					buttons.push_back(button);
-					x += width + 2;
-				}
-
-				y += height + 2;
-			}
-		}
-		break;
-	}
+	return;
 }
 
 void CMainViewDlg::RefreshGrid()
 {
-	// update grid label
-	char buffer[20] = { 0 };
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(_mEdit1D.GetDevice());
-			sprintf_s(buffer, "1 x %d", maxLeds);
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(_mEdit2D.GetDevice());
-			int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(_mEdit2D.GetDevice());
-			sprintf_s(buffer, "%d x %d", maxRow, maxColumn);
-		}
-		break;
-	}
-	GetControlGridSize()->SetWindowText(CString(buffer));
-
-
-	// update buttons
-	vector<CColorButton*>& buttons = GetGridButtons();
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(_mEdit1D.GetDevice());
-			EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame1D& frame = frames[currentFrame];
-				int id = 0;
-				for (int i = 0; i < maxLeds && i < frame.Colors.size(); ++i)
-				{
-					CColorButton* button = buttons[id];
-					if (button)
-					{
-						COLORREF color = frame.Colors[i];
-						button->SetColor(color, color);
-						button->Invalidate();
-					}
-					++id;
-				}
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(_mEdit2D.GetDevice());
-			int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(_mEdit2D.GetDevice());
-			EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				int id = 0;
-				for (int i = 0; i < maxRow && i < frame.Colors.size(); ++i)
-				{
-					FChromaSDKColors& row = frame.Colors[i];
-					for (int j = 0; j < maxColumn; ++j)
-					{
-						CColorButton* button = buttons[id];
-						if (button)
-						{
-							COLORREF color = row.Colors[j];
-							button->SetColor(color, color);
-							button->Invalidate();
-						}
-						++id;
-					}
-				}
-			}
-		}
-		break;
-	}
+	return;
 }
 
 void CMainViewDlg::RefreshFrames()
 {
-	//update frames label
-	char bufferFrameInfo[48] = { 0 };
-	int currentFrame = 0;
-	int frameCount = 0;
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		currentFrame = _mEdit1D.GetCurrentFrame();
-		frameCount = _mEdit1D.GetFrames().size();
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		currentFrame = _mEdit2D.GetCurrentFrame();
-		frameCount = _mEdit2D.GetFrames().size();
-		break;
-	}
-
-	sprintf_s(bufferFrameInfo, "%d", currentFrame + 1);
-	GetControlFrameIndex()->SetWindowText(CString(bufferFrameInfo));
-
-	sprintf_s(bufferFrameInfo, "%d of %d", currentFrame + 1, frameCount);
-	GetControlFrames()->SetWindowText(CString(bufferFrameInfo));
-
-	//update the frame duration
-	char bufferDuration[16] = { 0 };
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame1D& frame = frames[currentFrame];
-				sprintf_s(bufferDuration, "%f", frame.Duration);
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				sprintf_s(bufferDuration, "%f", frame.Duration);
-			}
-		}
-		break;
-	}
-	GetControlDuration()->SetWindowText(CString(bufferDuration));
+	return;
 }
 
 CStatic* CMainViewDlg::GetControlVersion()
 {
-	return (CStatic*)GetDlgItem(IDC_LABEL_VERSION);
+	return NULL;
 }
 
 CListBox* CMainViewDlg::GetControlListTypes()
 {
-	return (CListBox*)GetDlgItem(IDC_LIST_TYPES);
+	return NULL;
 }
 
 void CMainViewDlg::UpdateWindowTitle()
 {
-	if (_mDialogInitialized)
-	{
-		CString title = _T("Chroma Animation Editor - ");
-		if (_mPath.empty())
-		{
-			title += _T("Untitled");
-		}
-		else
-		{
-			title += _mPath.c_str();
-		}
-		SetWindowText(title);
-	}
+	return;
 }
 
 void CMainViewDlg::SetPath(const string& path)
 {
-	_mPath = path;
-	UpdateWindowTitle();
+	return;
 }
 
 BOOL CMainViewDlg::OnInitDialog()
 {
-	GetControlVersion()->SetWindowTextW(_T("Version: 1.5"));
-
-	_mDialogInitialized = true;
-
-	ModifyStyle(WS_SYSMENU, 0);
-
-	_mBrushIntensitity = 1.0f;
-	GetBrushSlider()->SetPos(100);
-	GetControlEditBrush()->SetWindowText(_T("100"));
-
-	GetControlEditDelete()->SetWindowText(_T("2"));
-
-	// Setup default
-	_mDeviceType = EChromaSDKDeviceTypeEnum::DE_2D;
-
-	LoadFile();
-
-	// setup dialog
-	UpdateOverrideTime(DEFAULT_OVERRIDE_TIME);
-
-	// setup keyboard chars
-	for (int key = EChromaSDKKeyboardKey::KK_ESC; key < EChromaSDKKeyboardKey::KK_INVALID; ++key)
-	{
-		const char* strKey = ChromaSDKPlugin::GetInstance()->GetKeyboardChar((EChromaSDKKeyboardKey)key);
-		GetControlSetKeyCombo()->AddString(CString(strKey));
-	}
-	GetControlSetKeyCombo()->SetCurSel(0);
-
-	// setup mouse chars
-	for (int led = EChromaSDKMouseLED::ML_SCROLLWHEEL; led <= EChromaSDKMouseLED::ML_RIGHT_SIDE7; ++led)
-	{
-		const char* strLed = ChromaSDKPlugin::GetInstance()->GetMouseChar((EChromaSDKMouseLED)led);
-		GetControlSetLEDCombo()->AddString(CString(strLed));
-	}
-	GetControlSetLEDCombo()->SetCurSel(0);
-
-	// Create the grid buttons
-	RecreateGrid();
-
-	// Display enums
-	RefreshDevice();
-
-	// Display grid
-	RefreshGrid();
-
-	// DIsplay frames
-	RefreshFrames();
-
-	COLORREF black = RGB(0, 0, 0);
-	COLORREF red = RGB(255, 0, 0);
-
-	//create color picker
-	int id = ID_DYNAMIC_COLOR_MIN;
-	int y = 600;
-	int x = 85;
-	int width = 50;
-	int height = 50;
-	if (true)
-	{
-		SetColor(red);
-		CColorButton* button = new CColorButton(red, red);
-		const int flags = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON |
-			BS_OWNERDRAW | BS_MULTILINE;
-		button->Create(_T(""), flags, CRect(x, y, x + width, y + height), this, id);
-		++id;
-		GetColorButtons().push_back(button);
-		x += width + 2;
-	}
-
-	// create palette
-	const float full = 255;
-	const float half = 127;
-	const float quater = 63;
-	int colors[] =
-	{
-		RGB(full, 0, 0), RGB(half, 0, 0),
-		RGB(full, half, 0), RGB(half, quater, 0),
-		RGB(full, full, 0), RGB(half, half, 0),
-		RGB(0, full, 0), RGB(0, half, 0),
-		RGB(0, 0, full), RGB(0, 0, half),
-		RGB(0, full, full), RGB(0, half, half),
-		RGB(full, 0, full), RGB(half, 0, half),
-		RGB(full, full, full), RGB(half, half, half), RGB(0,0,0)
-	};
-	width = 15;
-	height = 30;
-	for (unsigned int i = 0; i < size(colors); ++i)
-	{
-		CColorButton* button = new CColorButton(colors[i], colors[i]);
-		const int flags = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON |
-			BS_OWNERDRAW | BS_MULTILINE;
-		button->Create(_T(""), flags, CRect(x, y, x + width, y + height), this, id);
-		++id;
-		GetColorButtons().push_back(button);
-		x += width + 2;
-	}
-
-	if (_mPlayOnOpen)
-	{
-		OnBnClickedButtonPlay();
-	}
-
-	_mTimer = SetTimer(IDT_TIMER_0, 100, NULL);
-	_mWasPlaying = false;
 
 	return TRUE;
 }
 
 void CMainViewDlg::OnTextChangeFrameIndex()
 {
-	//update frames label
-	char bufferFrameInfo[48] = { 0 };
-	int currentFrame = GetCurrentFrame();
-	int frameCount = GetFrameCount();
-
-	CString strIndex;
-	GetControlFrameIndex()->GetWindowText(strIndex);
-	int index;
-	int result = swscanf_s(strIndex, _T("%d"), &index);
-	if (result == 1 &&
-		index > 0 &&
-		index <= frameCount &&
-		index != (currentFrame + 1))
-	{
-		SetCurrentFrame(index - 1);
-		RefreshGrid();
-		RefreshFrames();
-
-		//show changes
-		OnBnClickedButtonPreview();
-	}
+	return;
 }
 
 void CMainViewDlg::OnTextChangeBrush()
 {
-	CString strIntensity;
-	GetControlEditBrush()->GetWindowText(strIntensity);
-	int intensity;
-	int result = swscanf_s(strIntensity, _T("%d"), &intensity);
-	if (result == 1)
-	{
-		if (intensity < 0)
-		{
-			intensity = 0;
-		}
-		else if (intensity > 100)
-		{
-			intensity = 100;
-		}
-		if (GetBrushSlider()->GetPos() != intensity)
-		{
-			GetBrushSlider()->SetPos(intensity);
-			OnSliderBrushIntensity();
-		}
-	}
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonNthDelete()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	OnBnClickedButtonStop();
-	OnBnClickedButtonUnload();
-	OnBnClickedButtonFirst();
-
-	CString strNth;
-	GetControlEditDelete()->GetWindowText(strNth);
-
-	int nth;
-	int result = swscanf_s(strNth, _T("%d"), &nth);
-	if (result == 1 &&
-		nth > 1)
-	{
-		int index = 0;
-		int currentFrame;
-		do
-		{
-			currentFrame = GetCurrentFrame();
-			++index;
-			if (index == nth)
-			{
-				index = 0;
-				OnBnClickedButtonDelete();
-			}
-			else
-			{
-				OnBnClickedButtonNext();
-			}
-		} while ((currentFrame + 1) < GetFrameCount());
-	}
+	return;
 }
 
 BOOL CMainViewDlg::PreTranslateMessage(MSG* pMsg)
 {
-	int refocusToControl = IDC_BUTTON_CLEAR;
-
-	// check focus first
-	bool textFieldHasFocus = false;
-	CWnd* control = GetFocus();
-	if (control)
-	{
-		switch (control->GetDlgCtrlID())
-		{
-		case IDC_COMBO_KEYS:
-		case IDC_COMBO_LEDS:
-		case IDC_EDIT_BRUSH:
-		case IDC_EDIT_DELETE:
-		case IDC_EDIT_DURATION:
-		case IDC_EDIT_FRAME_INDEX:
-		case IDC_LIST_TYPES:
-		case IDC_SLIDER_BRUSH:
-		case IDC_TEXT_OVERRIDE_TIME:
-			textFieldHasFocus = true;
-			break;
-		}
-
-		switch (control->GetDlgCtrlID())
-		{
-		case IDC_LIST_TYPES:
-			GotoDlgCtrl(GetDlgItem(refocusToControl));
-			break;
-		}
-	}
-
-	if (!textFieldHasFocus)
-	{
-		if (pMsg->message == WM_KEYDOWN)
-		{
-			switch (pMsg->wParam)
-			{
-			case VK_CONTROL:
-				_mControlModifier = true;
-				break;
-			case VK_SHIFT:
-				_mShiftModifier = true;
-				break;
-			}
-		}
-		else if (pMsg->message == WM_KEYUP)
-		{
-			switch (pMsg->wParam)
-			{
-			case VK_OEM_MINUS:
-				OnBnClickedButtonDelete();
-				return true;
-			case VK_OEM_PLUS:
-				OnBnClickedButtonAdd();
-				return true;
-			case VK_LEFT:
-				OnBnClickedButtonPrevious();
-				return true;
-			case VK_RIGHT:
-				OnBnClickedButtonNext();
-				return true;
-			case VK_CONTROL:
-				_mControlModifier = false;
-				break;
-			case VK_SHIFT:
-				_mShiftModifier = false;
-				break;
-			case 'C':
-				if (_mControlModifier)
-				{
-					OnBnClickedButtonCopy();
-					return true;
-				}
-				break;
-			case 'V':
-				if (_mControlModifier)
-				{
-					OnBnClickedButtonPaste();
-					return true;
-				}
-				break;
-			case VK_OEM_4:
-				_mBrushIntensitity -= 0.2f;
-				if (_mBrushIntensitity < 0.0f)
-				{
-					_mBrushIntensitity = 0.0f;
-				}
-				GetBrushSlider()->SetPos((int)(_mBrushIntensitity * 100));
-				OnSliderBrushIntensity();
-				break;
-			case VK_OEM_6:
-				_mBrushIntensitity += 0.2f;
-				if (_mBrushIntensitity > 100.0f)
-				{
-					_mBrushIntensitity = 100.0f;
-				}
-				GetBrushSlider()->SetPos((int)(_mBrushIntensitity * 100));
-				OnSliderBrushIntensity();
-				break;
-			default:
-				fprintf(stdout, "Pressed: %d\r\n", pMsg->wParam);
-				break;
-			}
-		}
-	}
-	return CDialogEx::PreTranslateMessage(pMsg);
+	return FALSE;
 }
 
 void CMainViewDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+	return;
 }
 
 BEGIN_MESSAGE_MAP(CMainViewDlg, CDialogEx)
@@ -1056,184 +321,40 @@ END_MESSAGE_MAP()
 
 void CMainViewDlg::OnBnClickedMenuNew()
 {
-	OnBnClickedButtonStop();
-	OnBnClickedButtonUnload();
-
-	SetPath("");
-	OnBnClickedButtonReset();
-
-	// Create the grid buttons
-	RecreateGrid();
-
-	// Display enums
-	RefreshDevice();
-
-	// Display grid
-	RefreshGrid();
-
-	// DIsplay frames
-	RefreshFrames();
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedMenuOpen()
 {
-	// stop animation
-	OnBnClickedButtonStop();
-
-	// get path from loaded filename
-	CString szDir;
-	size_t lastSlash = _mPath.find_last_of("/\\");
-	if (lastSlash < 0)
-	{
-		return;
-	}
-	string path = _mPath.substr(0, lastSlash);
-	//LogDebug("ImportTextureAnimation path=%s", path.c_str());
-	szDir += path.c_str();
-
-	const int MAX_CFileDialog_FILE_COUNT = 99;
-	const int FILE_LIST_BUFFER_SIZE = ((MAX_CFileDialog_FILE_COUNT * (MAX_PATH + 1)) + 1);
-
-	CString fileName;
-	wchar_t* p = fileName.GetBuffer(FILE_LIST_BUFFER_SIZE);
-	CFileDialog dlgFile(TRUE);
-	OPENFILENAME& ofn = dlgFile.GetOFN();
-	ofn.lpstrFilter = _TEXT("Animation\0*.chroma\0");
-	ofn.lpstrInitialDir = szDir;
-	ofn.lpstrFile = p;
-	ofn.nMaxFile = FILE_LIST_BUFFER_SIZE;
-
-	if (dlgFile.DoModal() == IDOK)
-	{
-		SetPath(string(CT2CA(fileName)));
-		if (_mPath.size() <= 2 ||
-			_mPath.substr(_mPath.find_last_of(".") + 1) != "chroma")
-		{
-			_mPath += ".chroma";
-		}
-		LoadFile();
-
-		// Create the grid buttons
-		RecreateGrid();
-
-		// Display enums
-		RefreshDevice();
-
-		// Display grid
-		RefreshGrid();
-
-		//show changes
-		OnBnClickedButtonPreview();
-	}
-	fileName.ReleaseBuffer();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedMenuSave()
 {
-	// stop animation
-	OnBnClickedButtonStop();
-
-	SaveFile();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedMenuSaveAs()
 {
-	// stop animation
-	OnBnClickedButtonStop();
-
-	// get path from loaded filename
-	CString szDir;
-	size_t lastSlash = _mPath.find_last_of("/\\");
-	if (lastSlash < 0)
-	{
-		return;
-	}
-	string path = _mPath.substr(0, lastSlash);
-	//LogDebug("ImportTextureAnimation path=%s", path.c_str());
-	szDir += path.c_str();
-
-	const int MAX_CFileDialog_FILE_COUNT = 99;
-	const int FILE_LIST_BUFFER_SIZE = ((MAX_CFileDialog_FILE_COUNT * (MAX_PATH + 1)) + 1);
-
-	CString fileName;
-	wchar_t* p = fileName.GetBuffer(FILE_LIST_BUFFER_SIZE);
-	CFileDialog dlgFile(TRUE);
-	OPENFILENAME& ofn = dlgFile.GetOFN();
-	ofn.lpstrFilter = _TEXT("Animation\0*.chroma\0");
-	ofn.lpstrInitialDir = szDir;
-	ofn.lpstrFile = p;
-	ofn.nMaxFile = FILE_LIST_BUFFER_SIZE;
-
-	if (dlgFile.DoModal() == IDOK)
-	{
-		SetPath(string(CT2CA(fileName)));
-		if (_mPath.size() <= 2 ||
-			_mPath.substr(_mPath.find_last_of(".") + 1) != "chroma")
-		{
-			_mPath += ".chroma";
-		}
-		SaveFile();
-	}
-	fileName.ReleaseBuffer();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedMenuExit()
 {
-	// stop animation
-	OnBnClickedButtonStop();
-
-	PostQuitMessage(0);
+	return;
 }
 
 void CMainViewDlg::OnBnClickedMenuImportImage()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	OnBnClickedButtonUnload();
-
-	EditorAnimationBase* editor = GetEditor();
-	if (editor == nullptr)
-	{
-		return;
-	}
-	editor->ImportTextureImage();
-	RefreshGrid();
-	RefreshFrames();
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedMenuImportAnimation()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	EditorAnimationBase* editor = GetEditor();
-	if (editor == nullptr)
-	{
-		return;
-	}
-	editor->ImportTextureAnimation();
-	RefreshGrid();
-	RefreshFrames();
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
-vector<CColorButton*>& CMainViewDlg::GetGridButtons()
-{
-	return _mGridButtons;
-}
-
-vector<CColorButton*>& CMainViewDlg::GetColorButtons()
-{
-	return _mColorButtons;
-}
 
 COLORREF CMainViewDlg::GetColor()
 {
@@ -1243,17 +364,13 @@ COLORREF CMainViewDlg::GetColor()
 	int green = (color & 0xFF00) >> 8;
 	int blue = (color & 0xFF0000) >> 16;
 
-	red = (int)(red * _mBrushIntensitity);
-	green = (int)(green * _mBrushIntensitity);
-	blue = (int)(blue * _mBrushIntensitity);
-
 	color = (red & 0xFF) | ((green & 0xFF) << 8) | ((blue & 0xFF) << 16);
 	return color;
 }
 
 void CMainViewDlg::SetColor(COLORREF color)
 {
-	_mColor = color;
+	return;
 }
 
 void CMainViewDlg::OnOK()
@@ -1268,1282 +385,199 @@ void CMainViewDlg::OnCancel()
 
 void CMainViewDlg::OnTimer(UINT_PTR TimerVal)
 {
-	if (GetAnimation() == nullptr)
-	{
-		return;
-	}
-	if (GetAnimation()->IsPlaying())
-	{
-		// Display grid
-		RefreshGrid();
-
-		// Display frames
-		RefreshFrames();
-
-		_mWasPlaying = true;
-	}
-	else if (_mWasPlaying)
-	{
-		_mWasPlaying = false;
-
-		// Display grid
-		RefreshGrid();
-
-		// Display frames
-		RefreshFrames();
-	}
+	return;
 }
 
 void CMainViewDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	OnSliderBrushIntensity();
+	return;
 }
 
 void CMainViewDlg::OnSliderBrushIntensity()
 {
-	UINT nPos = GetBrushSlider()->GetPos();
-	char buffer[10] = { 0 };
-	sprintf_s(buffer, "%d", nPos);
-	GetControlEditBrush()->SetWindowText(CString(buffer));
-	_mBrushIntensitity = nPos / 100.0f;
-
-	// temp copy
-	COLORREF color = _mColor;
-	int red = (color & 0xFF);
-	int green = (color & 0xFF00) >> 8;
-	int blue = (color & 0xFF0000) >> 16;
-
-	red = (int)(red * _mBrushIntensitity);
-	green = (int)(green * _mBrushIntensitity);
-	blue = (int)(blue * _mBrushIntensitity);
-
-	color = (red & 0xFF) | ((green & 0xFF) << 8) | ((blue & 0xFF) << 16);
-
-	GetColorButtons()[0]->SetColor(color, color);
-	GetColorButtons()[0]->Invalidate();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonColor(UINT nID)
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	if (nID >= ID_DYNAMIC_BUTTON_MIN)
-	{
-		if (nID < ID_DYNAMIC_COLOR_MIN)
-		{
-			unsigned int index = nID - ID_DYNAMIC_BUTTON_MIN;
-			vector<CColorButton*>& buttons = GetGridButtons();
-			if (index < buttons.size())
-			{
-				COLORREF color = 0;
-				CColorButton* button = buttons[index];
-				if (!_mShiftModifier)
-				{
-					color = GetColor();
-					button->SetColor(color, color);
-					button->Invalidate();
-				}
-
-				switch (_mDeviceType)
-				{
-				case EChromaSDKDeviceTypeEnum::DE_1D:
-					{
-						EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-						int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(device);
-						vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-						unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-						if (currentFrame < 0 ||
-							currentFrame >= frames.size())
-						{
-							currentFrame = 0;
-						}
-						if (currentFrame < frames.size())
-						{
-							FChromaSDKColorFrame1D& frame = frames[currentFrame];
-							int i = index;
-							if (_mShiftModifier)
-							{
-								color = frame.Colors[i];
-								SetColor(color);
-								GetColorButtons()[0]->SetColor(color, color);
-								GetColorButtons()[0]->Invalidate();
-								OnSliderBrushIntensity();
-							}
-							else
-							{
-								frame.Colors[i] = color;
-								RefreshGrid();
-							}
-						}
-					}
-					break;
-				case EChromaSDKDeviceTypeEnum::DE_2D:
-					{
-						EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-						int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(device);
-						int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(device);
-						vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-						unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-						if (currentFrame < 0 ||
-							currentFrame >= frames.size())
-						{
-							currentFrame = 0;
-						}
-						if (currentFrame < frames.size())
-						{
-							FChromaSDKColorFrame2D& frame = frames[currentFrame];
-							int i = index / maxColumn;
-							FChromaSDKColors& row = frame.Colors[i];
-							int j = index - i * maxColumn;
-							if (_mShiftModifier)
-							{
-								color = row.Colors[j];
-								SetColor(color);
-								GetColorButtons()[0]->SetColor(color, color);
-								GetColorButtons()[0]->Invalidate();
-								OnSliderBrushIntensity();
-							}
-							else
-							{
-								row.Colors[j] = color;
-								RefreshGrid();
-							}
-						}
-					}
-					break;
-				}
-			}
-		}
-		else
-		{
-			int index = nID - ID_DYNAMIC_COLOR_MIN;
-			if (index == 0)
-			{
-				// Get the selected color from the CColorDialog. 
-				CColorDialog dlg(GetColor());
-				if (dlg.DoModal() == IDOK)
-				{
-					COLORREF color = dlg.GetColor();
-					SetColor(color);
-					GetColorButtons()[0]->SetColor(color, color);
-					GetColorButtons()[0]->Invalidate();
-					OnSliderBrushIntensity();
-				}
-			}
-			else
-			{
-				vector<CColorButton*> buttons = GetColorButtons();
-				CColorButton* button = buttons[index];
-				COLORREF color = button->GetBackgroundColor();
-				SetColor(color);
-				GetColorButtons()[0]->SetColor(color, color);
-				GetColorButtons()[0]->Invalidate();
-				OnSliderBrushIntensity();
-			}
-		}
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnSelChangeListTypes()
 {
-	// stop animation
-	OnBnClickedButtonStop();
-
-	bool changed = false;
-
-	EChromaSDKDeviceTypeEnum deviceType = EChromaSDKDeviceTypeEnum::DE_1D;
-	int index = GetControlListTypes()->GetCurSel();
-	switch (index)
-	{
-	case 0: //chromalink
-		deviceType = EChromaSDKDeviceTypeEnum::DE_1D;
-		break;
-	case 1: //headset
-		deviceType = EChromaSDKDeviceTypeEnum::DE_1D;
-		break;
-	case 2: //keyboard
-		deviceType = EChromaSDKDeviceTypeEnum::DE_2D;
-		break;
-	case 3: //keypad
-		deviceType = EChromaSDKDeviceTypeEnum::DE_2D;
-		break;
-	case 4://mouse
-		deviceType = EChromaSDKDeviceTypeEnum::DE_2D;
-		break;
-	case 5: //mousepad
-		deviceType = EChromaSDKDeviceTypeEnum::DE_1D;
-		break;
-	}
-	if (_mDeviceType != deviceType)
-	{
-		_mDeviceType = deviceType;
-		changed = true;
-	}
-	if (changed)
-	{
-		switch (_mDeviceType)
-		{
-		case EChromaSDKDeviceTypeEnum::DE_1D:
-			if (_mEdit1D.SetDevice(EChromaSDKDevice1DEnum::DE_ChromaLink))
-			{
-				changed = true;
-			}
-			break;
-		case EChromaSDKDeviceTypeEnum::DE_2D:
-			if (_mEdit2D.SetDevice(EChromaSDKDevice2DEnum::DE_Keyboard))
-			{
-				changed = true;
-			}
-			break;
-		}
-	}
-
-	EChromaSDKDevice1DEnum device1D = EChromaSDKDevice1DEnum::DE_ChromaLink;
-	EChromaSDKDevice2DEnum device2D = EChromaSDKDevice2DEnum::DE_Keyboard;
-	switch (index)
-	{
-	case 0: //chromalink
-		device1D = EChromaSDKDevice1DEnum::DE_ChromaLink;
-		break;
-	case 1: //headset
-		device1D = EChromaSDKDevice1DEnum::DE_Headset;
-		break;
-	case 2: //keyboard
-		device2D = EChromaSDKDevice2DEnum::DE_Keyboard;
-		break;
-	case 3: //keypad
-		device2D = EChromaSDKDevice2DEnum::DE_Keypad;
-		break;
-	case 4://mouse
-		device2D = EChromaSDKDevice2DEnum::DE_Mouse;
-		break;
-	case 5: //mousepad
-		device1D = EChromaSDKDevice1DEnum::DE_Mousepad;
-		break;
-	}
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		if (_mEdit1D.SetDevice(device1D))
-		{
-			changed = true;
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		if (_mEdit2D.SetDevice(device2D))
-		{
-			changed = true;
-		}
-		break;
-	}
-
-	if (changed)
-	{
-		// Create the grid buttons
-		RecreateGrid();
-
-		// Display enums
-		RefreshDevice();
-
-		// Display grid
-		RefreshGrid();
-	}
-
-	GetControlListTypes()->SetCurSel(index);
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonImportOverrideTime()
 {
-	float time = GetOverrideTime();
-	_mOverrideTime = time;
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		_mEdit1D.OverrideTime(time);
-		RefreshFrames();
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		_mEdit2D.OverrideTime(time);
-		RefreshFrames();
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 int CMainViewDlg::GetCurrentFrame()
 {
-	return GetEditor()->GetCurrentFrame();
+	return 0;
 }
 
 void CMainViewDlg::SetCurrentFrame(unsigned int index)
 {
-	GetEditor()->SetCurrentFrame(index);
+	return;
 }
 
 int CMainViewDlg::GetFrameCount()
 {
-	return GetEditor()->GetFrameCount();
+	return 0;
 }
 
 void CMainViewDlg::OnBnClickedButtonClear()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame1D& frame = frames[currentFrame];
-				frame.Colors = ChromaSDKPlugin::GetInstance()->CreateColors1D(device);
-				RefreshGrid();
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				frame.Colors = ChromaSDKPlugin::GetInstance()->CreateColors2D(device);
-				RefreshGrid();
-			}
-		}
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonFill()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-			int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(device);
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame1D& frame = frames[currentFrame];
-				for (int i = 0; i < maxLeds; ++i)
-				{
-					frame.Colors[i] = GetColor();
-				}
-				RefreshGrid();
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-			int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(device);
-			int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(device);
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				for (int i = 0; i < maxRow; ++i)
-				{
-					FChromaSDKColors& row = frame.Colors[i];
-					for (int j = 0; j < maxColumn; ++j)
-					{
-						row.Colors[j] = GetColor();
-					}
-				}
-				RefreshGrid();
-			}
-		}
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonFillBlank()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-	{
-		EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-		int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(device);
-		vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-		unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-		if (currentFrame < 0 ||
-			currentFrame >= frames.size())
-		{
-			currentFrame = 0;
-		}
-		if (currentFrame < frames.size())
-		{
-			FChromaSDKColorFrame1D& frame = frames[currentFrame];
-			for (int i = 0; i < maxLeds; ++i)
-			{
-				if (frame.Colors[i] == 0)
-				{
-					frame.Colors[i] = GetColor();
-				}
-			}
-			RefreshGrid();
-		}
-	}
-	break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-	{
-		EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-		int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(device);
-		int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(device);
-		vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-		unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-		if (currentFrame < 0 ||
-			currentFrame >= frames.size())
-		{
-			currentFrame = 0;
-		}
-		if (currentFrame < frames.size())
-		{
-			FChromaSDKColorFrame2D& frame = frames[currentFrame];
-			for (int i = 0; i < maxRow; ++i)
-			{
-				FChromaSDKColors& row = frame.Colors[i];
-				for (int j = 0; j < maxColumn; ++j)
-				{
-					if (row.Colors[j] == 0)
-					{
-						row.Colors[j] = GetColor();
-					}
-				}
-			}
-			RefreshGrid();
-		}
-	}
-	break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonDarken()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-	{
-		EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-		int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(device);
-		vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-		unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-		if (currentFrame < 0 ||
-			currentFrame >= frames.size())
-		{
-			currentFrame = 0;
-		}
-		if (currentFrame < frames.size())
-		{
-			FChromaSDKColorFrame1D& frame = frames[currentFrame];
-			for (int i = 0; i < maxLeds; ++i)
-			{
-				COLORREF color = frame.Colors[i];
-				int red = (color & 0xFF);
-				int green = (color & 0xFF00) >> 8;
-				int blue = (color & 0xFF0000) >> 16;
-				red = max(0, red - 16);
-				green = max(0, green - 16);
-				blue = max(0, blue - 16);
-				frame.Colors[i] = RGB(red, green, blue);
-			}
-			RefreshGrid();
-		}
-	}
-	break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-	{
-		EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-		int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(device);
-		int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(device);
-		vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-		unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-		if (currentFrame < 0 ||
-			currentFrame >= frames.size())
-		{
-			currentFrame = 0;
-		}
-		if (currentFrame < frames.size())
-		{
-			FChromaSDKColorFrame2D& frame = frames[currentFrame];
-			for (int i = 0; i < maxRow; ++i)
-			{
-				FChromaSDKColors& row = frame.Colors[i];
-				for (int j = 0; j < maxColumn; ++j)
-				{
-					COLORREF color = row.Colors[j];
-					int red = (color & 0xFF);
-					int green = (color & 0xFF00) >> 8;
-					int blue = (color & 0xFF0000) >> 16;
-					red = max(0, red - 16);
-					green = max(0, green - 16);
-					blue = max(0, blue - 16);
-					row.Colors[j] = RGB(red, green, blue);
-				}
-			}
-			RefreshGrid();
-		}
-	}
-	break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonLighten()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-	{
-		EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-		int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(device);
-		vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-		unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-		if (currentFrame < 0 ||
-			currentFrame >= frames.size())
-		{
-			currentFrame = 0;
-		}
-		if (currentFrame < frames.size())
-		{
-			FChromaSDKColorFrame1D& frame = frames[currentFrame];
-			for (int i = 0; i < maxLeds; ++i)
-			{
-				COLORREF color = frame.Colors[i];
-				int red = (color & 0xFF);
-				int green = (color & 0xFF00) >> 8;
-				int blue = (color & 0xFF0000) >> 16;
-				red = min(255, red + 16);
-				green = min(255, green + 16);
-				blue = min(255, blue + 16);
-				frame.Colors[i] = RGB(red, green, blue);
-			}
-			RefreshGrid();
-		}
-	}
-	break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-	{
-		EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-		int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(device);
-		int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(device);
-		vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-		unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-		if (currentFrame < 0 ||
-			currentFrame >= frames.size())
-		{
-			currentFrame = 0;
-		}
-		if (currentFrame < frames.size())
-		{
-			FChromaSDKColorFrame2D& frame = frames[currentFrame];
-			for (int i = 0; i < maxRow; ++i)
-			{
-				FChromaSDKColors& row = frame.Colors[i];
-				for (int j = 0; j < maxColumn; ++j)
-				{
-					COLORREF color = row.Colors[j];
-					int red = (color & 0xFF);
-					int green = (color & 0xFF00) >> 8;
-					int blue = (color & 0xFF0000) >> 16;
-					red = min(255, red + 16);
-					green = min(255, green + 16);
-					blue = min(255, blue + 16);
-					row.Colors[j] = RGB(red, green, blue);
-				}
-			}
-			RefreshGrid();
-		}
-	}
-	break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonRandom()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame1D& frame = frames[currentFrame];
-				frame.Colors = ChromaSDKPlugin::GetInstance()->CreateRandomColors1D(device);
-				RefreshGrid();
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				frame.Colors = ChromaSDKPlugin::GetInstance()->CreateRandomColors2D(device);
-				RefreshGrid();
-			}
-		}
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonCopy()
 {
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame1D& frame = frames[currentFrame];
-				_mEdit1D.SetCopy(frame);
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				_mEdit2D.SetCopy(frame);
-			}
-		}
-		break;
-	}
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonPaste()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				frames[currentFrame] = _mEdit1D.GetCopy();
-				RefreshGrid();
-				RefreshFrames();
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				frames[currentFrame] = _mEdit2D.GetCopy();
-				RefreshGrid();
-				RefreshFrames();
-			}
-		}
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonPreview()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			EChromaSDKDevice1DEnum device = _mEdit1D.GetDevice();
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame1D& frame = frames[currentFrame];
-				FChromaSDKEffectResult result = ChromaSDKPlugin::GetInstance()->CreateEffectCustom1D(device, frame.Colors);
-				if (result.Result == 0)
-				{
-					ChromaSDKPlugin::GetInstance()->SetEffect(result.EffectId);
-					ChromaSDKPlugin::GetInstance()->DeleteEffect(result.EffectId);
-				}
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			EChromaSDKDevice2DEnum device = _mEdit2D.GetDevice();
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= frames.size())
-			{
-				currentFrame = 0;
-			}
-			if (currentFrame < frames.size())
-			{
-				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				FChromaSDKEffectResult result = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(device, frame.Colors);
-				if (result.Result == 0)
-				{
-					ChromaSDKPlugin::GetInstance()->SetEffect(result.EffectId);
-					ChromaSDKPlugin::GetInstance()->DeleteEffect(result.EffectId);
-				}
-			}
-		}
-		break;
-	}
+	return;
 }
 
 EditorAnimationBase* CMainViewDlg::GetEditor()
 {
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		return &_mEdit1D;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		return &_mEdit2D;
-	default:
-		return nullptr;
-	}
+	
+	return nullptr;
+	
 }
 
 AnimationBase* CMainViewDlg::GetAnimation()
 {
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		return _mEdit1D.GetAnimation();
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		return _mEdit2D.GetAnimation();
-	default:
-		return nullptr;
-	}
+	
+	return nullptr;
+	
 }
 
 void CMainViewDlg::OnBnClickedButtonPlay()
 {
-	if (GetAnimation() != nullptr)
-	{
-		GetAnimation()->Play(false);
-	}
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonLoop()
 {
-	if (GetAnimation() != nullptr)
-	{
-		GetAnimation()->Play(true);
-	}
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonStop()
 {
-	if (GetAnimation() != nullptr)
-	{
-		GetAnimation()->Stop();
-	}
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonLoad()
 {
-	if (GetAnimation() != nullptr)
-	{
-		GetAnimation()->Load();
-	}
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonUnload()
 {
-	if (GetAnimation() != nullptr)
-	{
-		GetAnimation()->Unload();
-	}
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonSetKey()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	if (_mDeviceType == EChromaSDKDeviceTypeEnum::DE_2D &&
-		_mEdit2D.GetDevice() == EChromaSDKDevice2DEnum::DE_Keyboard)
-	{
-		vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-		unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-		if (currentFrame < 0 ||
-			currentFrame >= frames.size())
-		{
-			currentFrame = 0;
-		}
-		if (currentFrame < frames.size())
-		{
-			int id = GetControlSetKeyCombo()->GetCurSel();
-			EChromaSDKKeyboardKey key = (EChromaSDKKeyboardKey)id;
-			FChromaSDKColorFrame2D& frame = frames[currentFrame];
-			std::vector<FChromaSDKColors>& colors = frame.Colors;
-			ChromaSDKPlugin::GetInstance()->SetKeyboardKeyColor(key, GetColor(), colors);
-			RefreshGrid();
-		}
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonSetLed()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	if (_mDeviceType == EChromaSDKDeviceTypeEnum::DE_2D &&
-		_mEdit2D.GetDevice() == EChromaSDKDevice2DEnum::DE_Mouse)
-	{
-		vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-		unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-		if (currentFrame < 0 ||
-			currentFrame >= frames.size())
-		{
-			currentFrame = 0;
-		}
-		if (currentFrame < frames.size())
-		{
-			int id = GetControlSetLEDCombo()->GetCurSel();
-			EChromaSDKMouseLED led = (EChromaSDKMouseLED)id;
-			FChromaSDKColorFrame2D& frame = frames[currentFrame];
-			std::vector<FChromaSDKColors>& colors = frame.Colors;
-			ChromaSDKPlugin::GetInstance()->SetMouseLEDColor(led, GetColor(), colors);
-			RefreshGrid();
-		}
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonFirst()
 {
-	SetCurrentFrame(0);
-	RefreshGrid();
-	RefreshFrames();
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonLast()
 {
-	int frameCount = GetFrameCount();
-	if (frameCount > 0)
-	{
-		SetCurrentFrame(frameCount - 1);
-		RefreshGrid();
-		RefreshFrames();
-
-		//show changes
-		OnBnClickedButtonPreview();
-	}
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonPrevious()
 {
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 1 ||
-				currentFrame >= _mEdit1D.GetFrameCount())
-			{
-				currentFrame = 0;
-			}
-			else
-			{
-				--currentFrame;
-			}
-			_mEdit1D.SetCurrentFrame(currentFrame);
-			RefreshGrid();
-			RefreshFrames();
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 1 ||
-				currentFrame >= _mEdit2D.GetFrameCount())
-			{
-				currentFrame = 0;
-			}
-			else
-			{
-				--currentFrame;
-			}
-			_mEdit2D.SetCurrentFrame(currentFrame);			
-			RefreshGrid();
-			RefreshFrames();
-		}
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonNext()
 {
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= _mEdit1D.GetFrameCount())
-			{
-				currentFrame = 0;
-			}
-			if ((currentFrame + 1) < _mEdit1D.GetFrameCount())
-			{
-				++currentFrame;
-			}
-			_mEdit1D.SetCurrentFrame(currentFrame);
-			RefreshGrid();
-			RefreshFrames();
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= _mEdit2D.GetFrameCount())
-			{
-				currentFrame = 0;
-			}
-			if ((currentFrame + 1) < _mEdit2D.GetFrameCount())
-			{
-				++currentFrame;
-			}
-			_mEdit2D.SetCurrentFrame(currentFrame);			
-			RefreshGrid();
-			RefreshFrames();
-		}
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonInsert()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	OnBnClickedButtonCopy();
-	OnBnClickedButtonAdd();
-	OnBnClickedButtonNext();
-	OnBnClickedButtonPaste();
-	OnBnClickedButtonPrevious();
-	OnBnClickedButtonClear();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonAdd()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		_mEdit1D.AddFrame();
-		RefreshGrid();
-		RefreshFrames();
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		_mEdit2D.AddFrame();
-		RefreshGrid();
-		RefreshFrames();
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonDuplicate()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	OnBnClickedButtonCopy();
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		_mEdit1D.AddFrame();
-		RefreshGrid();
-		RefreshFrames();
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		_mEdit2D.AddFrame();
-		RefreshGrid();
-		RefreshFrames();
-		break;
-	}
-
-	OnBnClickedButtonPaste();
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 void CMainViewDlg::OnBnClickedButtonDelete()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= _mEdit1D.GetFrameCount())
-			{
-				currentFrame = 0;
-			}			
-			vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-			if (frames.size() == 1)
-			{
-				FChromaSDKColorFrame1D frame = FChromaSDKColorFrame1D();
-				frame.Colors = ChromaSDKPlugin::GetInstance()->CreateColors1D(_mEdit1D.GetDevice());
-				frames[0] = frame;
-			}
-			else if (frames.size() > 0)
-			{
-				auto it = frames.begin();
-				frames.erase(it+currentFrame);
-				if (currentFrame == frames.size())
-				{
-					currentFrame = frames.size() - 1;
-					_mEdit1D.SetCurrentFrame(currentFrame);
-				}
-			}
-			RefreshGrid();
-			RefreshFrames();
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= _mEdit2D.GetFrameCount())
-			{
-				currentFrame = 0;
-			}			
-			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-			if (frames.size() == 1)
-			{
-				FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D();
-				frame.Colors = ChromaSDKPlugin::GetInstance()->CreateColors2D(_mEdit2D.GetDevice());
-				frames[0] = frame;
-			}
-			else if (frames.size() > 0)
-			{
-				auto it = frames.begin();
-				frames.erase(it+currentFrame);
-				if (currentFrame == frames.size())
-				{
-					currentFrame = frames.size() - 1;
-					_mEdit2D.SetCurrentFrame(currentFrame);
-				}
-			}
-			RefreshGrid();
-			RefreshFrames();
-		}
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonReset()
 {
-	OnBnClickedButtonUnload(); // delete frame state
-
-	OnBnClickedButtonStop();
-
-	AnimationBase* animation = GetAnimation();
-	if (animation != nullptr)
-	{
-		animation->ResetFrames();
-		RefreshGrid();
-		RefreshFrames();
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }
 
 
 void CMainViewDlg::OnBnClickedButtonSetDuration()
 {
-	switch (_mDeviceType)
-	{
-	case EChromaSDKDeviceTypeEnum::DE_1D:
-		{
-			unsigned int currentFrame = _mEdit1D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= _mEdit1D.GetFrameCount())
-			{
-				currentFrame = 0;
-			}			
-			if (currentFrame < _mEdit1D.GetFrameCount())
-			{
-				vector<FChromaSDKColorFrame1D>& frames = _mEdit1D.GetFrames();
-				FChromaSDKColorFrame1D& frame = frames[currentFrame];
-				frame.Duration = GetDuration();
-				RefreshFrames();
-			}
-		}
-		break;
-	case EChromaSDKDeviceTypeEnum::DE_2D:
-		{
-			unsigned int currentFrame = _mEdit2D.GetCurrentFrame();
-			if (currentFrame < 0 ||
-				currentFrame >= _mEdit2D.GetFrameCount())
-			{
-				currentFrame = 0;
-			}			
-			if (currentFrame < _mEdit2D.GetFrameCount())
-			{
-				vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
-				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				frame.Duration = GetDuration();
-				RefreshFrames();
-			}
-		}
-		break;
-	}
-
-	//show changes
-	OnBnClickedButtonPreview();
+	return;
 }

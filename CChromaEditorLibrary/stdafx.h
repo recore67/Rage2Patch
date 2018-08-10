@@ -158,9 +158,6 @@ extern "C"
 	EXPORT_API int PluginReverse(int animationId);
 	EXPORT_API int PluginMirrorHorizontally(int animationId);
 	EXPORT_API int PluginMirrorVertically(int animationId);
-
-	int PluginGetAnimationIdFromInstance(ChromaSDK::AnimationBase* animation);
-	ChromaSDK::AnimationBase* GetAnimationInstance(int animationId);
 	
 	EXPORT_API int PluginGetAnimation(const char* name);
 	EXPORT_API double PluginGetAnimationD(const char* name);

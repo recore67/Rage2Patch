@@ -144,7 +144,7 @@ int ChromaThread::GetAnimationId(int index)
 		AnimationBase* animation =_mAnimations[index];
 		if (animation != nullptr)
 		{
-			return PluginGetAnimationIdFromInstance(animation);
+			return 1;
 		}
 	}
 	return -1;
