@@ -52,7 +52,7 @@ void updateSensitivity(HANDLE handle, int& initialSens, const std::vector<int> o
 		}
 	}
 	else {
-		if (!condition && currentValue != initialSens) {
+		if (condition && currentValue != initialSens) {
 			initialSens = currentValue;
 		}
 	}
@@ -117,8 +117,10 @@ void ChromaThread::ChromaWorker()
 	HWND hwnd = FindWindowA(NULL, "RAGE2");
 
 	uintptr_t baseAddress = (uintptr_t)GetModuleHandle(L"RAGE2.exe");
-	long isInVehicleBaseOffset = 0x30;
-	const std::vector<int> isInVehicleOffsets = { 0x02D705F0, 0x48, 0x8, 0x28, 0xC08, 0x408, 0x8 };
+	//long isInVehicleBaseOffset = 0x30;
+	//const std::vector<int> isInVehicleOffsets = { 0x02D705F0, 0x48, 0x8, 0x28, 0xC08, 0x408, 0x8 };
+	long isInVehicleBaseOffset = 0x1F0;
+	const std::vector<int> isInVehicleOffsets = { 0x02D7F808, 0x18, 0x90, 0x10, 0x98, 0xA8, 0x160 };
 
 	long SensitivtyBaseOffset = 0x4C8;
 	const std::vector<int> SensitivtyOffsets = { 0x02D7D228, 0xD8, 0x18, 0x1C0, 0x410, 0x0 };
@@ -137,17 +139,21 @@ void ChromaThread::ChromaWorker()
 		HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
 
 		while (procID != NULL) {
-			//Get and store initial Sensitivity, let player change sens when on foot
-			updateSensitivity(handle, initialVSens, VSensitivtyOffsets, VSensitivtyBaseOffset, baseAddress, revertSens);
-			updateSensitivity(handle, initialXSens, SensitivtyOffsets, SensitivtyBaseOffset, baseAddress, revertSens);
-
 			auto isInVehicle = ReadValue(handle, isInVehicleOffsets, isInVehicleBaseOffset, baseAddress);
-			if (isInVehicle == 1) {
+
+			if (isInVehicle == 0) {
+				//Get and store initial Sensitivity, let player change sens when on foot
+				updateSensitivity(handle, initialVSens, VSensitivtyOffsets, VSensitivtyBaseOffset, baseAddress, !revertSens);
+				updateSensitivity(handle, initialXSens, SensitivtyOffsets, SensitivtyBaseOffset, baseAddress, !revertSens);
+			}
+
+			if (isInVehicle != 0) {
 				if (!revertSens) {
-					WriteValue(handle, VSensitivtyOffsets, VSensitivtyBaseOffset, baseAddress, 300);
-					WriteValue(handle, SensitivtyOffsets, SensitivtyBaseOffset, baseAddress, 100);
+					//WriteValue(handle, VSensitivtyOffsets, VSensitivtyBaseOffset, baseAddress, 300);
+					//WriteValue(handle, SensitivtyOffsets, SensitivtyBaseOffset, baseAddress, 100);
+					revertSens = WriteValue(handle, SensitivtyOffsets, SensitivtyBaseOffset, baseAddress, 100) &&
+						WriteValue(handle, VSensitivtyOffsets, VSensitivtyBaseOffset, baseAddress, 300);
 				}
-				revertSens = true;
 			}
 			else {
 				if (revertSens) {
@@ -209,7 +215,7 @@ void ChromaThread::AddAnimation(AnimationBase* animation)
 	{
 		_mAnimations.push_back(animation);
 	}
-	
+
 }
 
 void ChromaThread::RemoveAnimation(AnimationBase* animation)
@@ -240,7 +246,7 @@ int ChromaThread::GetAnimationId(int index)
 	}
 	if (index < int(_mAnimations.size()))
 	{
-		AnimationBase* animation =_mAnimations[index];
+		AnimationBase* animation = _mAnimations[index];
 		if (animation != nullptr)
 		{
 			return 1;
