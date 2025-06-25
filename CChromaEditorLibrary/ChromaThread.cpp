@@ -126,7 +126,7 @@ void ChromaThread::ChromaWorker()
 	const std::vector<int> SensitivtyOffsets = { 0x02D7D228, 0xD8, 0x18, 0x1C0, 0x410, 0x0 };
 
 	long VSensitivtyBaseOffset = 0x4CC;
-	const std::vector<int> VSensitivtyOffsets = { 0x02D7DC28, 0x160, 0x5E0, 0x288, 0x18, 0x1C0, 0x378 };
+	const std::vector<int> VSensitivtyOffsets = { 0x02D7F8C0, 0x110, 0x5A0, 0x318, 0x160, 0x378 };
 
 	int initialVSens = NULL;
 	int initialXSens = NULL;
